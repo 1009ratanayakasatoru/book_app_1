@@ -1,0 +1,22 @@
+/* custom.css */
+
+body {
+    background-color: #ffe4e1; /* ピンク系の背景色 */
+    font-family: 'Poppins', sans-serif; /* 可愛いフォント */
+    background-image: url("/static/onboro/images/00_rabbit.jpg");
+    background-repeat: repeat; /* 画像を繰り返して表示 */
+    background-size: 200px 200px; /* 画像のサイズを自動調整 */
+}
+
+.container {
+    border-radius: 15px; /* 角を丸くする */
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* 背景を少し透明にする */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.navbar {
+    border-radius: 15px; /* 角を丸くする */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.8); /* 背景を少し透明にする */
+    }

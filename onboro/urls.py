@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from . import views
 
@@ -16,4 +18,6 @@ urlpatterns = [
     path('books/<int:book_id>/chapters/<int:number>', views.BookChapterView.as_view(), name='book_chapter'),
     path('users/<int:pk>/transactions/charge', views.transaction_charge, name='transaction_charge'),
     path('users/<int:pk>/transactions/use', views.transaction_use, name='transaction_use'),
-]
+    path('books/<int:book_id>/add_review/', views.add_review, name='add_review'),
+    path('reviews/<int:review_id>/delete/', views.delete_review, name='delete_review'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

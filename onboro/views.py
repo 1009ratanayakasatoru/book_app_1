@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import generic
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import mixins as auth_mixins
@@ -7,9 +6,13 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.db.models import Q
-from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.http import HttpResponseForbidden
+from .models import Book
+from django.contrib.auth.decorators import login_required
+from .models import Book, Review
+from .forms import ReviewForm
+
 
 import csv
 import codecs
@@ -73,6 +76,8 @@ class BookDetailView(BookSearchMixin, generic.DetailView):
                     'user': user.pk,
                     'book': book_pk
                 })
+
+        context['reviews'] = Review.objects.filter(book_id=book_pk)
 
         context['can_view_chapter'] = can_view_chapter(user, book_pk)
 
@@ -203,6 +208,8 @@ def transaction_use(request, pk):
             user = record.user
             book = record.book
 
+            print(f"ユーザー: {user.username}, コイン: {user.coin}, 本の価格: {book.price}") #ログの追加
+
             if user.coin < book.price:
                 messages.warning(request, 'コインが足りません。')
                 # コード重複にはなるがインデントが深くなるとわかりにくくなるのでここでreturn
@@ -217,4 +224,58 @@ def transaction_use(request, pk):
                 record.datetime = timezone.now()
                 record.save()
 
+                user.books.add(book) #本をユーザーの購入リストに追加
+                user.save()
+
+                print(f"本が購入リストに追加されました: {user.books.all()}")  # ログの追加
+
             return redirect('onboro:book_detail', book.pk)
+
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, 'books/book_list.html',{'books':books})
+
+@login_required
+def add_review(request, book_id):
+    book = Book.objects.get(id=book_id)
+    #ユーザーがすでにこの本に対してレビューを書いているか確認
+    existing_review = Review.objects.filter(book=book, user=request.user).first()
+    if existing_review:
+        messages.error(request, 'あなたは既にこの本にレビューを投稿しています。')
+        return redirect('onboro:book_detail', pk=book.id)
+
+     # ユーザーが本を購入しているか確認
+    if not request.user.books.filter(pk=book_id).exists():
+        messages.error(request, 'この本を購入していないため、レビューを投稿できません。')
+        return redirect('onboro:book_detail', pk=book.id)
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.book = book
+            review.user = request.user
+            review.save()
+            return redirect('onboro:book_detail', pk=book.id)
+    else:
+        form = ReviewForm()
+
+        # デバッグ用にレビューリストを追加
+    reviews = Review.objects.filter(book=book, user=request.user)
+    print(reviews)  # デバッグ出力
+
+    return render(request, 'onboro/add_review.html', {'form': form, 'book': book})
+
+
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    if request.method == "POST":
+        if review.user == request.user:
+            review.delete()
+            messages.success(request, "レビューが削除されました。")
+        else:
+            messages.error(request, "あなたはこのレビューを削除する権限がありません。")
+        return redirect('onboro:book_detail', pk=review.book.id)
+
+    return render(request, 'onboro/delete_review_confirm.html', {'review': review})
+

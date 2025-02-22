@@ -1,4 +1,5 @@
 from django import forms
+from.models import Review
 
 from .models import Category, TransactionRecord
 
@@ -27,3 +28,8 @@ class CoinUseForm(forms.ModelForm):
             'user': forms.HiddenInput,
             'book': forms.HiddenInput
         }
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']

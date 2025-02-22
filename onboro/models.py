@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 
 class User(AbstractUser):
     coin = models.IntegerField(default=0, verbose_name='コイン')
@@ -29,6 +30,7 @@ class Book(models.Model):
     abstract = models.TextField(verbose_name='概要')
     price = models.PositiveIntegerField(verbose_name='価格')
     published = models.BooleanField('公開')
+    image = models.ImageField(upload_to='book_images/', null=True, blank=True, verbose_name='画像')
 
     class Meta:
         verbose_name = '書籍'
@@ -74,3 +76,18 @@ class TransactionRecord(models.Model):
     class Meta:
         verbose_name = '取引記録'
         verbose_name_plural = '取引記録'
+
+class Review(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name='書籍')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='ユーザー')
+    rating = models.PositiveIntegerField(verbose_name='評価', default=0)
+    comment = models.TextField(verbose_name='コメント', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='投稿日')
+
+    class Meta:
+        verbose_name = 'レビュー'
+        verbose_name_plural = 'レビュー'
+        unique_together = ('book', 'user')  # 同じユーザーが同じ書籍に複数のレビューを投稿できないようにする
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title}"

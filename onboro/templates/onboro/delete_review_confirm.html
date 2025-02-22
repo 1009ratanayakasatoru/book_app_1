@@ -1,0 +1,18 @@
+{% extends 'onboro/base.html' %}
+
+{% block title %}
+レビュー削除確認 | {{ block.super }}
+{% endblock %}
+
+{% block contents %}
+<h1>レビュー削除確認</h1>
+<p>本当にこのレビューを削除しますか？</p>
+<p>書籍: {{ review.book.title }}</p>
+<p>レビュー: {{ review.content }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">削除</button>
+    <a href="{% url 'onboro:book_detail' review.book.id %}" class="btn btn-secondary">キャンセル</a>
+</form>
+{% endblock %}

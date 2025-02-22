@@ -1,0 +1,17 @@
+{% extends 'onboro/base.html' %}
+
+{% block title %}
+レビュー追加 | {{ block.super }}
+{% endblock %}
+
+{% block contents %}
+
+<h1>レビュー追加: {{ book.title }}</h1>
+<form method="post" action="{% url 'onboro:add_review' book.id %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">投稿</button>
+</form>
+
+{% endblock %}
+

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import Review
 
 from .models import User, Category, Book, Chapter, TransactionRecord
 
@@ -32,3 +33,5 @@ class TransactionRecordAdmin(admin.ModelAdmin):
     search_help_text = 'ユーザー名と書籍名で検索できます'
 
 admin.site.register(TransactionRecord, TransactionRecordAdmin)
+
+admin.site.register(Review)
